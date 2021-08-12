@@ -43,6 +43,7 @@ class Config(object):
     MOMENTUM = 0.9
     BOUNDARYS = [15]
     LR_VALS = [2.5e-4, 2.5e-5]
+    NUM_GPUS = 1
     PER_GPU_IMAGE = 2
     PRE_GPU_BATCH_SIZE = 4
     LOSS_WEIGHTS = {"ae_loss": 0.1}

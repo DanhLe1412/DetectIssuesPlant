@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras import layers
-import tensorflow.keras.engine as KE
+import tensorflow.python.keras.engine as KE
 
 """
 Inspired by this https://github.com/ducha-aiki/caffenet-benchmark/blob/master/batchnorm.md, 
@@ -27,6 +27,7 @@ def top_pool(inputs):
 
 def left_pool(inputs):
     _, h, w, c = inputs.get_shape().as_list()
+    print("L: {} - {}".format(h,w))
     x = layers.Lambda(lambda x: tf.reverse(x, [2]))(inputs)
     x = layers.Lambda(lambda x: tf.pad(x, tf.constant([[0, 0], [0, 0], [w-1, 0], [0, 0]]), constant_values=0))(x)
     x = layers.Lambda(lambda x:tf.nn.max_pool(x, (1, w), (1, 1), padding="VALID"))(x)
@@ -40,6 +41,9 @@ def bottom_pool(inputs):
     out = layers.Lambda(lambda x: tf.nn.max_pool(x, (h, 1), (1, 1), padding="VALID"))(x)
     return out
 
+class RP(tf.keras.layers.Layer):
+    def __init__(self, trainable, name, dtype, dynamic, **kwargs):
+        super().__init__(trainable=trainable, name=name, dtype=dtype, dynamic=dynamic, **kwargs)
 
 def right_pool(inputs):
     _, h, w, c = inputs.get_shape().as_list()
@@ -64,13 +68,15 @@ def center_pool(inputs, outchannels):
     return out
 
 
-def pool(inputs, outchannels, pool1, pool2,):
+def pool(inputs, outchannels, pool1, pool2, testing="nah"):
+
     x1 = convblock(inputs, outchannels, 3)
     x2 = convblock(inputs, outchannels, 3)
     x2 = pool2(x2)
     x = layers.Add()([x1, x2])
     x = layers.Conv2D(outchannels, 3, padding='same')(x)
     x = pool1(x)
+    print(testing)
 
     y1 = convblock(inputs, outchannels, 3)
     y2 = convblock(inputs, outchannels, 3)
@@ -86,16 +92,17 @@ def pool(inputs, outchannels, pool1, pool2,):
     out = layers.Add()([skip_x, feat])
     out = layers.ReLU(max_value=6)(out)
     out = convblock(out, outchannels, 3)
+   
     return out
 
 
 def cascade_tl_pool(inputs, outchannels):
-    out = pool(inputs, outchannels, top_pool, left_pool)
+    out = pool(inputs, outchannels, top_pool, left_pool, "TopleftPooling----------------")
     return out
 
 
 def cascade_br_pool(inputs, outchannels):
-    out = pool(inputs, outchannels, bottom_pool, right_pool)
+    out = pool(inputs, outchannels, bottom_pool, right_pool,"BottomRightPooling-----------")
     return out
 
 

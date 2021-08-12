@@ -10,7 +10,7 @@ if __name__ == '__main__':
     config = COCOConfig()
 
     model = CenterNet52(config=config,
-                              model_dir=config.MODLE_DIR)
+                              weight_dir=config.MODLE_DIR)
 
     dataset_train = CocoDataset()
     dataset_train.load_coco(config.DATA_DIR, "val", auto_download=True)
@@ -23,5 +23,6 @@ if __name__ == '__main__':
     print("Training network")
     model.train(dataset_train, dataset_val,
                 learning_rate=config.LR_VALS[0],
-                epochs=40,
+                epochs = config.EPOCHS,
                 augment=True)
+    model.save("fine.h5")

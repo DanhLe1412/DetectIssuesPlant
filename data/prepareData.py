@@ -11,13 +11,13 @@ import shutil
 # Root directory of the project
 ROOT_DIR = os.path.abspath("../../")
 sys.path.append(ROOT_DIR)  # To find local version of the library
-from data import utils
-from data.image import random_crop, color_jittering, lighting, normalize
-from data.image import pad_same_size
-from data.transform import np_draw_gaussian
+import data.utils.image_meta as image_meta
+from data.utils.image import random_crop, color_jittering, lighting, normalize
+from data.utils.image import pad_same_size
+from data.utils.transform import np_draw_gaussian
 
 
-class CocoDataset(utils.Dataset):
+class CocoDataset(image_meta.Dataset):
     def load_coco(self, dataset_dir, subset, class_ids=None,
                   class_map=None, return_coco=False, auto_download=False):
         """Load a subset of the COCO dataset.
@@ -212,7 +212,7 @@ def load_image_gt(dataset, config, image_id, augment=False):
     active_class_ids = np.zeros([dataset.num_classes], dtype=np.int32)
     source_class_ids = dataset.source_class_ids[dataset.image_info[image_id]["source"]]
     active_class_ids[source_class_ids] = 1
-    image_meta = utils.compose_image_meta(image_id, original_shape, image.shape, windows, scale, active_class_ids)
+    image_meta = image_meta.compose_image_meta(image_id, original_shape, image.shape, windows, scale, active_class_ids)
 
     return image, bboxs, class_ids, image_meta
 
